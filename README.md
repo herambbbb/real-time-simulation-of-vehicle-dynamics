@@ -2,7 +2,7 @@
 
 Real-time, hardware-in-the-loop simulation of five automotive control systems (suspension, cruise control, anti-lock braking, motor speed and throttle) on a **dSPACE MicroLabBox**, modelled in **MATLAB/Simulink** and verified on a digital storage oscilloscope.
 
-> 📄 **Patent pending:** Indian Patent Application No. **202321073605**, *"System and Method for Real Time Simulation of Vehicle Control Systems"* (filed October 2023).
+> 📄 **Patent pending:** Indian Patent Application No. **202321073605**, *"System and Method for Real Time Simulation of Vehicle Control Systems"* (filed October 2023). See the [filing receipt](docs/Patent-Filing-Receipt.pdf).
 
 B.E. final-year project, Department of Electronics Engineering, Ramrao Adik Institute of Technology (University of Mumbai), April 2023.
 
@@ -43,7 +43,8 @@ Closing the loop cut overshoot and settling time across all five systems compare
 .
 ├── README.md
 └── docs/
-    └── Real-Time-Simulation-of-Vehicle-Dynamics-Report.pdf
+    ├── Real-Time-Simulation-of-Vehicle-Dynamics-Report.pdf
+    └── Patent-Filing-Receipt.pdf
 ```
 
 ## Future work
