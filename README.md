@@ -6,6 +6,63 @@ Real-time, hardware-in-the-loop simulation of five automotive control systems (s
 
 B.E. final-year project, Department of Electronics Engineering, Ramrao Adik Institute of Technology (University of Mumbai), April 2023.
 
+## How it works
+
+Each controller is built the same way, then run on the same bench.
+
+```mermaid
+flowchart LR
+  model["MATLAB / Simulink<br/>plant, controller, state-space"]
+  desk["dSPACE ControlDesk"]
+  box["MicroLabBox<br/>real-time target"]
+  scope["Digital storage<br/>oscilloscope"]
+
+  model -->|"compile and load"| box
+  desk -->|"Ethernet: parameters and traces"| box
+  box -->|"input and output signals"| scope
+```
+
+```mermaid
+flowchart TD
+  plant["Derive the plant transfer function"]
+  open["Open-loop step response<br/>overshoot, settling time, steady-state error"]
+  tune["Compare P, PI and PID<br/>keep the one with the best settling and overshoot"]
+  closed["Closed-loop response in Simulink"]
+  ss["Equivalent state-space model<br/>pole placement for a stable time response"]
+  rt["Same model on MicroLabBox"]
+  dso["Compare the DSO traces with the Simulink plots"]
+
+  plant --> open --> tune --> closed --> rt --> dso
+  plant --> ss --> rt
+```
+
+The closed loop is ordinary feedback. The controller is PI for suspension, cruise control and motor speed, and PID for ABS and throttle.
+
+```mermaid
+flowchart LR
+  ref["Setpoint"] --> err["Error"]
+  err --> ctrl["PI or PID"]
+  ctrl --> plant["Plant G(s)"]
+  plant --> y["Measured output"]
+  y -->|"subtract"| err
+```
+
+| System | What is controlled | Controller | Plant, from the report | Open-loop behaviour the controller fixes |
+|---|---|---|---|---|
+| Suspension (bus quarter-car) | Body motion after a road step, such as leaving a pothole | PI | 4th order, eq. 4.1 | Underdamped: oscillation and a very long settling time |
+| Cruise control | Vehicle speed | PI | \(1/(1000s+50)\), eq. 4.2 | Stable, no overshoot, rise time too slow. Pole at \(-0.05\) |
+| Anti-lock braking | Brake pressure so the wheel does not lock | PID | \(10/(s^2+0.7s+0.1)\), eq. 4.3 | Stable, no oscillation, rise time too slow |
+| DC motor speed | Shaft speed | PI | \(0.01/(0.005s^2+0.06s+0.1001)\), eq. 4.4 | No overshoot. Poles at \(-2\) and \(-10\); the pole at \(-2\) sets the speed |
+| Throttle | Throttle position | PID | \(1/(s^2+s+1.1)\), eq. 4.5 | Underdamped. Poles at \(-0.5 \pm 0.922j\) |
+
+Suspension plant (report equation 4.1), force to sprung-mass displacement:
+
+\[
+G(s)=\frac{2820s^{2}+15020s+500000}{800000s^{4}+3.854\times10^{7}s^{3}+1.481\times10^{9}s^{2}+1.377\times10^{9}s+4\times10^{10}}
+\]
+
+On the hardware, each transfer function is also written as a state-space model (four states for suspension, one for cruise control, two for ABS, motor speed and throttle). Closed-loop poles are placed so the time response stays stable, and those traces are read on the oscilloscope next to the Simulink plots.
+
 ## Why
 
 Modern vehicles run many interacting control loops, and most simulations of them run offline. This project builds each loop as a real-time model on automotive-grade prototyping hardware, so open-loop and closed-loop behaviour can be compared live, the same way the industry prototypes and tests controllers.
